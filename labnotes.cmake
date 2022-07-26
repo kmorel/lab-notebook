@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
+set(_labnotes_templates_dir ${CMAKE_CURRENT_LIST_DIR}/templates)
+
 function(_labnotes_get_file_date yearvar monthvar dayvar filename months)
   get_filename_component(dayfile ${filename} NAME)
   string(REGEX MATCH "([0-9]+)\\.md" dayfile "${dayfile}")
@@ -124,7 +126,10 @@ will be most relevant to current work."
     if(year AND month AND day)
       # Make a header for the entry that gives the date.
       set(_entry_header ${_header_dir}/${year}${month}${day})
-      configure_file(templates/entry_header.md ${_entry_header})
+      configure_file(
+        ${_labnotes_templates_dir}/entry_header.md
+        ${_entry_header}
+        )
 
       # Establish files and directories
       get_filename_component(_resource_path ${file} DIRECTORY)
