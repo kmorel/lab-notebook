@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 
-
 function(_labnotes_get_file_date yearvar monthvar dayvar filename months)
   get_filename_component(dayfile ${filename} NAME)
   string(REGEX MATCH "([0-9]+)\\.md" dayfile "${dayfile}")
@@ -121,24 +120,24 @@ will be most relevant to current work."
   set(_pdf_dir ${CMAKE_CURRENT_BINARY_DIR}/pdf_directory)
   set(_header_dir ${CMAKE_CURRENT_BINARY_DIR}/headers)
   foreach(file ${markdown_files})
-    get_file_date(year month day ${file}, ${months})
+    _labnotes_get_file_date(year month day ${file} "${months}")
     if(year AND month AND day)
       # Make a header for the entry that gives the date.
-      set(entry_header ${_header_dir}/${year}${month}${day})
-      configure_file(templates/entry_header.md ${entry_header})
+      set(_entry_header ${_header_dir}/${year}${month}${day})
+      configure_file(templates/entry_header.md ${_entry_header})
 
       # Establish files and directories
-      get_filename_component(resource_path ${file} DIRECTORY)
+      get_filename_component(_resource_path ${file} DIRECTORY)
       set(_pdf_file ${_pdf_dir}/${year}${month}${day}.pdf)
 
       add_custom_command(OUTPUT ${_pdf_file}
         COMMAND ${PANDOC_EXECUTABLE}
           --from=markdown --to=pdf
-          --output=${pdf_file}
-	  --resource-path=${resource_path}
+          --output=${_pdf_file}
+	  --resource-path=${_resource_path}
 	  --standalone
-          ${entry_header} ${file}
-        DEPENDS ${entry_header} ${file}
+          ${_entry_header} ${file}
+        DEPENDS ${_entry_header} ${file}
         COMMENT "Building ${file}"
         )
       list(APPEND _pdf_files ${_pdf_file})
