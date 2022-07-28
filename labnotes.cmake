@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(_labnotes_templates_dir ${CMAKE_CURRENT_LIST_DIR}/templates)
+set(_labnotes_cmake_dir ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 function(_labnotes_get_file_date yearvar monthvar dayvar filename months)
   get_filename_component(dayfile ${filename} NAME)
@@ -121,28 +122,41 @@ will be most relevant to current work."
   set(_pdf_files)
   set(_pdf_dir ${CMAKE_CURRENT_BINARY_DIR}/pdf_directory)
   set(_header_dir ${CMAKE_CURRENT_BINARY_DIR}/headers)
+  set(_md_dir ${CMAKE_CURRENT_BINARY_DIR}/processed_notes)
   foreach(file ${markdown_files})
     _labnotes_get_file_date(year month day ${file} "${months}")
     if(year AND month AND day)
-      # Make a header for the entry that gives the date.
+      # Establish files and directories
+      get_filename_component(_resource_path ${file} DIRECTORY)
       set(_entry_header ${_header_dir}/${year}${month}${day})
+      set(_processed_md ${_md_dir}/${year}${month}${day}.md)
+      set(_pdf_file ${_pdf_dir}/${year}${month}${day}.pdf)
+
+      # Make a header for the entry that gives the date.
       configure_file(
         ${_labnotes_templates_dir}/entry_header.md
         ${_entry_header}
         )
 
-      # Establish files and directories
-      get_filename_component(_resource_path ${file} DIRECTORY)
-      set(_pdf_file ${_pdf_dir}/${year}${month}${day}.pdf)
+      # Process the entry for markdown extensions
+      add_custom_command(OUTPUT ${_processed_md}
+        COMMAND ${CMAKE_COMMAND}
+          -DINPUT=${file}
+          -DOUTPUT=${_processed_md}
+          -P ${_labnotes_cmake_dir}/ExtendedMarkdown.cmake
+        DEPENDS ${file}
+        COMMENT "Processing ${file}"
+        )
 
+      # Build the pdf for the entry
       add_custom_command(OUTPUT ${_pdf_file}
         COMMAND ${PANDOC_EXECUTABLE}
           --from=markdown --to=pdf
           --output=${_pdf_file}
 	  --resource-path=${_resource_path}
 	  --standalone
-          ${_entry_header} ${file}
-        DEPENDS ${_entry_header} ${file}
+          ${_entry_header} ${_processed_md}
+        DEPENDS ${_entry_header} ${_processed_md}
         COMMENT "Building ${file}"
         )
       list(APPEND _pdf_files ${_pdf_file})

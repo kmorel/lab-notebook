@@ -105,6 +105,43 @@ means you do not have to worry about using the same filename for two
 different days.
 
 
+### Text Files
+
+The lab notebook build does some extra processing of your markdown files to
+include further support for formatting common to lab notebooks. One common
+feature is the ability to insert the content of a text file into your
+laboratory notebook.
+
+The format for inserting a text file is the format
+`@[<format>](<filename>)`. You will notice that this is very similar to the
+markdown syntax for inserting an image except that the `!` is replaced with
+a `@`. Also note that instead of alternate text, you specify the format of
+the text file being inserted. (You can leave this field blank for a
+standard text file.) Also, this substitution only works if the item is on
+its own line.
+
+Here is a simple example of its use.
+
+```md
+## Python class
+
+Today I am learning how to program in Python. Here is my first program.
+
+@[python](04/helloworld.py)
+```
+
+This will be expanded to something like the following markdown before being
+processed by pandoc.
+
+    ## Python class
+    
+    Today I am learning how to program in Python. Here is my first program.
+    
+    ```python
+    print('hello world')
+    ```
+
+
 ## Building
 
 Here are some details on building the compiled laboratory notebook.
