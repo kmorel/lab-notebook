@@ -21,7 +21,7 @@ file(READ "${INPUT}" input)
 
 # Process input
 set(output)
-set(include_regex "[\r\n]@\\[(.*)\\]\\((.*)\\)[ \t\r\n]*")
+set(include_regex "[\r\n]@\\[([^\n()]*)\\]\\(([^\n]*)\\)[ \t\r\n]*")
 
 string(REGEX MATCH "${include_regex}" match "${input}")
 while(match)
